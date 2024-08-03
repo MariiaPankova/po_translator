@@ -1,0 +1,6 @@
+openai
+polib
+python-dotenv
+tiktoken
+pandas
+gradio
