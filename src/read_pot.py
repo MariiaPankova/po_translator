@@ -30,6 +30,15 @@ async def translate_pofile(filepath: str, output_path: str) -> int:
     }
 
 
+async def estimate_pofile(filepath:str):
+    translator = Translator()
+    source_pofile = polib.pofile(filepath)
+    token_estimate = 0
+    for entry in source_pofile:
+        token_estimate += translate_pofile.estimate_usage(entry)
+    return token_estimate
+
+
 class Translator:
     def __init__(
         self,
