@@ -3,46 +3,46 @@
 # Follow these steps:
 
 #     1. Split Input into JSON with "text", "katex", and "markdown" Keys:
-#         Separate plain text, LaTeX (anything surrounded by $ symbols or respective tags such as \begin{{{{...}}}}), and Markdown components (like titles/headers and images).  
-#         Example: Input: "Example for you: ## Problem A\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{My fauvorite formula!}}}}  \\traingle UQR $$" 
-#                 Json: {{{{"text": "Example for you:",
-#                         "katex": "$$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{My fauvorite formula!}}}}  \\traingle UQR $$"", 
-#                         "markdown": "## Problem A\n\n[[☃ image 1]]"}}}}
+#         Separate plain text, LaTeX (anything surrounded by $ symbols or respective tags such as \begin{{...}}), and Markdown components (like titles/headers and images).  
+#         Example: Input: "Example for you: ## Problem A\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$" 
+#                 Json: {{"text": "Example for you:",
+#                         "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$"", 
+#                         "markdown": "## Problem A\n\n[[☃ image 1]]"}}
 
 #     2. Translate plain text in Ukrainian using the glossary. Only translate text outside of LaTeX commands.
-#         Example: {{{{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{My favorite formula!}}}} \\triangle UQR $$","markdown": "## Problem A\n\n[[☃ image 1]]"}}}}}}}}
+#         Example: {{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My favorite formula!}} \\triangle UQR $$","markdown": "## Problem A\n\n[[☃ image 1]]"}}
 
 #     3. Translate LaTeX  entries in Ukrainian using the following algorithm:
 
 #     function translateLatex(latexContent):
 #         split latexContent into entries by spaces or new lines
 #         for each entry:
-#             if entry matches ```\\text{{{{some_text}}}}``` command:
+#             if entry matches ```\\text{{some_text}}``` command:
 #                 translate some_text using glossary
 #                 replace original with translated text
 #             else:
 #                 continue
 #         return joined entries
-#     Example: {{{{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{Моя улюблена формула!}}}} \\triangle UQR $$","markdown": "## Problem A\n\n[[☃ image 1]]"}}}}}}}}}}}}
+#     Example: {{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{Моя улюблена формула!}} \\triangle UQR $$","markdown": "## Problem A\n\n[[☃ image 1]]"}}
 #     IMPORTANT: Do not change specific LaTeX commands like \\angle, \\triangle, \\frac, \\sqrt.
-# 4. Translate Markdown titles/headers in Ukrainian. Preserve Markdown image names and other non-translatable Markdown elements as they are. Example: {{{{{{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{Моя улюблена формула!}}}}  \\traingle UQR $$"", "markdown": "## Задача A\n\n[[☃ image 1]]"}}}}}}}}
+# 4. Translate Markdown titles/headers in Ukrainian. Preserve Markdown image names and other non-translatable Markdown elements as they are. Example: {{"text": "Приклад для тебе:", "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{Моя улюблена формула!}}  \\traingle UQR $$"", "markdown": "## Задача A\n\n[[☃ image 1]]"}}
 
 # 5. Merge and Preserve Formatting:
 
 #     Combine the translated text, LaTeX, and Markdown components while preserving titles and image names. Keep all formulas and special symbols intact. Always use double backslash (\\) in commands.
-#     Example: "Приклад для тебе: $$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{Моя улюблена формула!}}}} \\triangle UQR $$"
+#     Example: "Приклад для тебе: $$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{Моя улюблена формула!}} \\triangle UQR $$"
 
 # 6.Generate Valid JSON:
 
 #     Ensure the final JSON is valid and preserves all LaTeX formatting. Double ckeck to include all of entries from original input.
-#     Example: {{{{"final_translation": "Приклад для тебе: ## Задача А\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{{{\\angle TUB}}}} x^n + y^n = z^n \\right)\n\\text{{{{Моя улюблена формула!}}}} \\triangle UQR $$"}}}}
+#     Example: {{"final_translation": "Приклад для тебе: ## Задача А\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{Моя улюблена формула!}} \\triangle UQR $$"}}
 
 # Here is a glossary for you to use:
 # ###
-# {{glossary}}
+# {glossary}
 # ###
 
-# Here's another complete example of good translation: Input: "$\\angle UAB$ is equal to $\\angle VUB$". Output: {{{{"final_translation": "$\\angle UAB$ дорівнює $\\angle VUB$"}}}}
+# Here's another complete example of good translation: Input: "$\\angle UAB$ is equal to $\\angle VUB$". Output: {{"final_translation": "$\\angle UAB$ дорівнює $\\angle VUB$"}}
 # Follow this steps strictly for every entry. Have you included everything? Have you added something you shouldn't? Have you correctly handled LaTeX entries, preserving all specific commands?
 # Return only the final merged json as your response with "final_translation" as a key. Response:
 # """

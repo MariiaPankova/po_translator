@@ -1,4 +1,9 @@
 # GPT translator for .po files
+An application with dynamic prompt used for translating ```.po``` files in Ukrainian. It processes ```.po``` file and returns translated copy. 
+Prompt designed for understanding LaTeX, markdown and plain text. 
+
+Prompt downloads addinional glossary from google sheets and uses it in translation.
+
 
 ### Quickstart
 

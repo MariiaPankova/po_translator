@@ -23,6 +23,7 @@ async def translate_pofile(filepath: str, output_path: str) -> int:
             )
         )
     )
+    print(translated_pofile)
     translated_pofile.save(output_path)
     return {
         "read_tokens": translator.token_usage_prompt,
@@ -79,11 +80,12 @@ class Translator:
             )
             translate = json.loads(response.choices[0].message.content)
             if translate.get("final_translation") is not None:
+                entry.msgstr = translate.get("final_translation")
                 break
             print("None occured, retry")
-            entry.msgstr = translate.get("final_translation")
         self.token_usage_prompt += response.usage.prompt_tokens
         self.token_usage_generated += response.usage.completion_tokens
+        # print(entry)
         return entry
 
     def estimate_usage(self, entry):
