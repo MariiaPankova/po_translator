@@ -38,9 +38,11 @@ OPENAI_API_KEY = "sk-..."
 In this case you can leave ```openAI API key``` field in UI empty.
 
 ### How to use
-![alt text](image.png)
+![alt text](image-1.png)
 
 1. Provide your OpenAI API key in text field in format ```sk-...```.
 2. Upload your .po file you want to translate.
 3. Click submit.
-4. Get your translated .po file in Ukrainian from right panel.
+4. Get your translated .po file in Ukrainian
+
+Alternatively, if you need to translate only one paragraph of plain text, you can check it on the second tab of this UI ```translate text chunck```. 
