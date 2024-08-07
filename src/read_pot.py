@@ -9,6 +9,17 @@ import pandas as pd
 
 load_dotenv()
 
+
+async def translate_text_entry(text: str):
+    translator = Translator()
+    translated_text = await translator.translate_text(text)
+    print(translated_text)
+    return translated_text, {
+        "read_tokens": translator.token_usage_prompt,
+        "gen_tokens": translator.token_usage_generated,
+    }
+
+
 async def translate_pofile(filepath: str, output_path: str) -> int:
     translator = Translator()
     source_pofile = polib.pofile(filepath)
@@ -23,20 +34,19 @@ async def translate_pofile(filepath: str, output_path: str) -> int:
             )
         )
     )
-    print(translated_pofile)
     translated_pofile.save(output_path)
     return {
-        "read_tokens": translator.token_usage_prompt,
+        "read_tokens    print(translated_pofile)": translator.token_usage_prompt,
         "gen_tokens": translator.token_usage_generated,
     }
 
 
-async def estimate_pofile(filepath:str):
+async def estimate_pofile(filepath: str):
     translator = Translator()
     source_pofile = polib.pofile(filepath)
     token_estimate = 0
     for entry in source_pofile:
-        token_estimate += translate_pofile.estimate_usage(entry)
+        token_estimate += translator.estimate_usage(entry)
     return token_estimate
 
 
@@ -55,7 +65,7 @@ class Translator:
         self.glossary = self._set_glossary(spreadsheet_path)
         self.max_retry = 2
 
-    def _set_glossary(self, glossary_path):
+    def _set_glossary(self, glossary_path: str):
         glossary = (
             pd.read_csv(glossary_path, index_col=0, usecols=[0, 1])
             .dropna()
@@ -63,7 +73,7 @@ class Translator:
         )
         self.glossary = glossary
 
-    async def translate_entry(self, entry):
+    async def translate_entry(self, entry: polib.POFile):
         text = entry.msgid
         for _ in range(self.max_retry):
             response = await self.client.chat.completions.create(
@@ -85,10 +95,30 @@ class Translator:
             print("None occured, retry")
         self.token_usage_prompt += response.usage.prompt_tokens
         self.token_usage_generated += response.usage.completion_tokens
-        # print(entry)
         return entry
 
-    def estimate_usage(self, entry):
+    async def translate_text(self, text: str):
+        for _ in range(self.max_retry):
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self.prompt.format(glossary=self.glossary),
+                    },
+                    {"role": "user", "content": text},
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+            )
+            translate = json.loads(response.choices[0].message.content)
+            if translate.get("final_translation") is not None:
+                self.token_usage_prompt += response.usage.prompt_tokens
+                self.token_usage_generated += response.usage.completion_tokens
+                return translate.get("final_translation")
+            print("None occured, retry")
+
+    def estimate_usage(self, entry: polib.POFile):
         encoding = tiktoken.encoding_for_model(self.model)
         text = entry.msgstr
         messages = [
@@ -109,7 +139,7 @@ class Translator:
 
 
 if __name__ == "__main__":
-    # print(asyncio.run(get_translation("If we want this pattern to continue (and we do!), then $5^0$ must be $1$.")))
+    # # print(asyncio.run(get_translation("If we want this pattern to continue (and we do!), then $5^0$ must be $1$.")))
     print(
         asyncio.run(
             translate_pofile(

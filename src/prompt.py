@@ -1,12 +1,12 @@
-# translator_prompt = """ 
+# translator_prompt = """
 # Your task is to translate text to Ukrainian while preserving LaTeX formulas and Markdown components (including titles/headers and images) without altering their content.
 # Follow these steps:
 
 #     1. Split Input into JSON with "text", "katex", and "markdown" Keys:
-#         Separate plain text, LaTeX (anything surrounded by $ symbols or respective tags such as \begin{{...}}), and Markdown components (like titles/headers and images).  
-#         Example: Input: "Example for you: ## Problem A\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$" 
+#         Separate plain text, LaTeX (anything surrounded by $ symbols or respective tags such as \begin{{...}}), and Markdown components (like titles/headers and images).
+#         Example: Input: "Example for you: ## Problem A\n\n[[☃ image 1]] $$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$"
 #                 Json: {{"text": "Example for you:",
-#                         "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$"", 
+#                         "katex": "$$\\left(\\underline \\angle ABC \\greenD{{\\angle TUB}} x^n + y^n = z^n \\right)\n\\text{{My fauvorite formula!}}  \\traingle UQR $$"",
 #                         "markdown": "## Problem A\n\n[[☃ image 1]]"}}
 
 #     2. Translate plain text in Ukrainian using the glossary. Only translate text outside of LaTeX commands.
@@ -53,13 +53,13 @@ function translateContent(input):
     # Step 1: Split input into JSON with "text", "katex", and "markdown" keys
     json_input = splitInput(input)
     
-    # Step 2: Translate plain text using the glossary
+    # Step 2: Translate plain text  in Ukrainian using the glossary
     translated_text = translateText(json_input["text"])
     
-    # Step 3: Translate LaTeX entries
+    # Step 3: Translate LaTeX entries in Ukrainian 
     translated_katex = translateLatex(json_input["katex"])
     
-    # Step 4: Translate Markdown titles/headers
+    # Step 4: Translate Markdown titles/headers in Ukrainian 
     translated_markdown = translateMarkdown(json_input["markdown"])
     
     # Step 5: Merge and preserve formatting

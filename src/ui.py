@@ -1,33 +1,52 @@
 import gradio as gr
-from read_pot import translate_pofile, estimate_pofile
+from read_pot import translate_pofile, estimate_pofile, translate_text_entry
 from os import environ, path
 
 
-async def process_file(api_key, input_file):
+async def process_file(api_key: str, input_file: str):
     environ["OPENAI_API_KEY"] = api_key
-    output_path = path.join(path.split(input_file)[0], "UA_translated_" + path.split(input_file)[-1])
+    output_path = path.join(
+        path.split(input_file)[0], "UA_translated_" + path.split(input_file)[-1]
+    )
     tokens = await translate_pofile(input_file, output_path)
     return output_path, tokens
 
-#TODO: add button to count prompt tokens
-#TODO: fix prompt
-#TODO: README
+
+async def process_text(api_key: str, input_text: str):
+    environ["OPENAI_API_KEY"] = api_key
+    translation, tokens = await translate_text_entry(input_text)
+    return translation, tokens
 
 
-input_file = gr.File()
-output_file = gr.File()
-api_key = gr.Text(label="OpenAI API Key", type="password")
-tokens_used = gr.Textbox(label="Token usage: ")
+with gr.Blocks() as demo:
+    with gr.Tab(label="Translate .po file"):
+        api_key = gr.Text(label="OpenAI API Key", type="password")
+        input_file = gr.File()
+        translate_po_button = gr.Button(value="Translate")
+        output_file = gr.File()
+        tokens = gr.Textbox(label="Tokens Used")
 
-file_for_estimate = gr.File()
-estimated_tokens = gr.Textbox(label="Estimated prompt usage: ")
+        translate_po_button.click(
+            process_file, inputs=[api_key, input_file], outputs=[output_file, tokens]
+        )
 
+        estimate_button = gr.Button(value="Estimate")
+        estimated_tokens = gr.Text(label="Estimated read usage")
+        estimate_button.click(
+            estimate_pofile, inputs=[input_file], outputs=[estimated_tokens]
+        )
 
-demo = gr.Interface(
-    fn=process_file,
-    inputs=[api_key, input_file],
-    outputs=[output_file, tokens_used],
-)
+    with gr.Tab(label="Translate text chunck"):
+        api_key = gr.Text(label="OpenAI API Key", type="password")
+        input_text = gr.Text(label="Input text for translation")
+
+        translate_text_button = gr.Button(value="Translate")
+
+        output_text = gr.Textbox()
+        tokens = gr.Textbox(label="Tokens Used")
+        translate_text_button.click(
+            process_text, inputs=[api_key, input_text], outputs=[output_text, tokens]
+        )
 
 
 demo.launch(server_name="0.0.0.0")
