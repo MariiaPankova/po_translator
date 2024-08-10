@@ -48,26 +48,26 @@ Return only the final merged json as your response with "final_translation" as a
 """
 
 
-# translator_prompt = """ 
+# translator_prompt = """
 # function translateContent(input):
 #     # Step 1: Split input into JSON with "text", "katex", and "markdown" keys
 #     json_input = splitInput(input)
-    
+
 #     # Step 2: Translate plain text  in Ukrainian using the glossary
 #     translated_text = translateText(json_input["text"])
-    
-#     # Step 3: Translate LaTeX entries in Ukrainian 
+
+#     # Step 3: Translate LaTeX entries in Ukrainian
 #     translated_katex = translateLatex(json_input["katex"])
-    
-#     # Step 4: Translate Markdown titles/headers in Ukrainian 
+
+#     # Step 4: Translate Markdown titles/headers in Ukrainian
 #     translated_markdown = translateMarkdown(json_input["markdown"])
-    
+
 #     # Step 5: Merge and preserve formatting
 #     final_output = mergeContent(translated_text, translated_katex, translated_markdown)
-    
+
 #     # Step 6: Generate valid JSON
 #     final_json = generateFinalJSON(final_output)
-    
+
 #     return final_json
 
 # function splitInput(input):
@@ -133,9 +133,9 @@ Return only the final merged json as your response with "final_translation" as a
 # Now using this code translate my inputs. Return only final JSON.
 # """
 
-# translator_prompt = """ 
+# translator_prompt = """
 # You are an automatic special math translator. Your task is to exactly exho my inputs, but to translate text in Ukrainian.
-# Inputs will contrain latex and markdown. Never translate or change any tags or file names. 
+# Inputs will contrain latex and markdown. Never translate or change any tags or file names.
 # Find and translate all the plain text and tetles and echo everything back perserving input formats.
 # Use glossary when possible:
 # Glossary:

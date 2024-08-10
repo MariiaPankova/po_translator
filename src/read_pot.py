@@ -1,18 +1,13 @@
-import polib
-from openai import AsyncOpenAI
-from prompt import translator_prompt
-from dotenv import load_dotenv
 import asyncio
-import json
-import tiktoken
-import pandas as pd
-from loguru import logger
-load_dotenv()
+
+import polib
+
+from translator import translator
 
 
 async def translate_text_entry(text: str):
-    translator = Translator()
-    translated_text = await translator.translate_text(text)
+    with translator:
+        translated_text = await translator.translate(text)
     return translated_text, {
         "read_tokens": translator.token_usage_prompt,
         "gen_tokens": translator.token_usage_generated,
@@ -20,19 +15,19 @@ async def translate_text_entry(text: str):
 
 
 async def translate_pofile(filepath: str, output_path: str) -> int:
-    translator = Translator()
     source_pofile = polib.pofile(filepath)
 
     translated_pofile = polib.POFile()
     translated_pofile.metadata = source_pofile.metadata
 
-    translated_pofile.extend(
-        (
-            await asyncio.gather(
-                *(translator.translate_entry(entry) for entry in source_pofile)
+    with translator:
+        translated_pofile.extend(
+            (
+                await asyncio.gather(
+                    *(translator.translate_entry(entry) for entry in source_pofile)
+                )
             )
         )
-    )
     translated_pofile.save(output_path)
     return {
         "read_tokens": translator.token_usage_prompt,
@@ -41,115 +36,11 @@ async def translate_pofile(filepath: str, output_path: str) -> int:
 
 
 async def estimate_pofile(filepath: str):
-    translator = Translator()
     source_pofile = polib.pofile(filepath)
     token_estimate = 0
     for entry in source_pofile:
         token_estimate += translator.estimate_usage(entry)
     return token_estimate
-
-
-class Translator:
-    def __init__(
-        self,
-        model: str = "gpt-4o-mini",
-        prompt: str = translator_prompt,
-        spreadsheet_path: str = "https://docs.google.com/spreadsheets/d/1Uu2dv8W4mKegu_EswaXOhtIkOURv5Ixn/export?gid=827914249&format=csv",
-    ):
-        self.client = AsyncOpenAI()
-        self.model = model
-        self.prompt = prompt
-        self.token_usage_prompt = 0
-        self.token_usage_generated = 0
-        self.glossary = self._set_glossary(spreadsheet_path)
-        self.max_retry = 3
-
-    def _set_glossary(self, glossary_path: str):
-        glossary = (
-            pd.read_csv(glossary_path, index_col=0, usecols=[0, 1])
-            .dropna()
-            .to_string(formatters={"UKR": "- {}".format})
-        )
-        self.glossary = glossary
-
-    async def translate_entry(self, entry: polib.POFile):
-        text = entry.msgid
-        for _ in range(self.max_retry):
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.prompt.format(glossary=self.glossary),
-                    },
-                    {"role": "user", "content": text},
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0,
-            )
-            logger.info("Got response!")
-
-            self.token_usage_prompt += response.usage.prompt_tokens
-            self.token_usage_generated += response.usage.completion_tokens
-            try:
-                translate = json.loads(response.choices[0].message.content)
-                if translate.get("final_translation") is not None:
-                    entry.msgstr = translate.get("final_translation")
-                    logger.info("Entry translated!")
-                    return entry
-                else:
-                    logger.warning(f"Response None. \nInput: {text}, \nResponse: {response}")
-                
-            except:
-                logger.error(f"FAILED TO GET JSON. \nInput: {text} \nContent: {response}")
-
-            logger.warning(f"Retry.")
-        logger.error("Retry limit exceeded")
-        entry.msgstr = "ERROR"
-        return entry
-
-    async def translate_text(self, text: str):
-        for _ in range(self.max_retry):
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.prompt.format(glossary=self.glossary),
-                    },
-                    {"role": "user", "content": text},
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0,
-            )
-            logger.info("Entry translated!")
-            translate = json.loads(response.choices[0].message.content)
-            if translate.get("final_translation") is not None:
-                self.token_usage_prompt += response.usage.prompt_tokens
-                self.token_usage_generated += response.usage.completion_tokens
-                if not isinstance(translate.get("final_translation"), str):
-                    logger.warning("Response with translation was not str instance.")
-                return str(translate.get("final_translation"))
-            print("None occured, retry")
-
-    def estimate_usage(self, entry: polib.POFile):
-        encoding = tiktoken.encoding_for_model(self.model)
-        text = entry.msgstr
-        messages = [
-            {"role": "system", "content": self.prompt},
-            {"role": "user", "content": text},
-        ]
-        tokens_per_message = 4
-        tokens_per_name = 1
-        num_tokens = 0
-        for message in messages:
-            num_tokens += tokens_per_message
-            for key, value in message.items():
-                num_tokens += len(encoding.encode(value))
-                if key == "name":
-                    num_tokens += tokens_per_name
-        num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
-        return num_tokens
 
 
 if __name__ == "__main__":
@@ -162,5 +53,4 @@ if __name__ == "__main__":
             )
         )
     )
-    translator = Translator()
     # translator.estimate_usage()

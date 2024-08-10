@@ -1,7 +1,9 @@
-import gradio as gr
-from read_pot import translate_pofile, estimate_pofile, translate_text_entry
 from os import environ, path
+
+import gradio as gr
 from loguru import logger
+
+from read_pot import estimate_pofile, translate_pofile, translate_text_entry
 
 
 async def process_file(api_key: str, input_file: str):
@@ -17,6 +19,8 @@ async def process_file(api_key: str, input_file: str):
 async def process_text(api_key: str, input_text: str):
     environ["OPENAI_API_KEY"] = api_key
     translation, tokens = await translate_text_entry(input_text)
+    if translation is None:
+        raise gr.Error("Error occured. Please retry.")
     return translation, tokens
 
 
