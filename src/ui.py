@@ -1,6 +1,7 @@
 import gradio as gr
 from read_pot import translate_pofile, estimate_pofile, translate_text_entry
 from os import environ, path
+from loguru import logger
 
 
 async def process_file(api_key: str, input_file: str):
@@ -9,6 +10,7 @@ async def process_file(api_key: str, input_file: str):
         path.split(input_file)[0], "UA_translated_" + path.split(input_file)[-1]
     )
     tokens = await translate_pofile(input_file, output_path)
+    logger.info("File finished!")
     return output_path, tokens
 
 

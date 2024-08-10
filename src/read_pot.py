@@ -6,14 +6,13 @@ import asyncio
 import json
 import tiktoken
 import pandas as pd
-
+from loguru import logger
 load_dotenv()
 
 
 async def translate_text_entry(text: str):
     translator = Translator()
     translated_text = await translator.translate_text(text)
-    print(translated_text)
     return translated_text, {
         "read_tokens": translator.token_usage_prompt,
         "gen_tokens": translator.token_usage_generated,
@@ -36,7 +35,7 @@ async def translate_pofile(filepath: str, output_path: str) -> int:
     )
     translated_pofile.save(output_path)
     return {
-        "read_tokens    print(translated_pofile)": translator.token_usage_prompt,
+        "read_tokens": translator.token_usage_prompt,
         "gen_tokens": translator.token_usage_generated,
     }
 
@@ -63,7 +62,7 @@ class Translator:
         self.token_usage_prompt = 0
         self.token_usage_generated = 0
         self.glossary = self._set_glossary(spreadsheet_path)
-        self.max_retry = 2
+        self.max_retry = 3
 
     def _set_glossary(self, glossary_path: str):
         glossary = (
@@ -88,13 +87,25 @@ class Translator:
                 response_format={"type": "json_object"},
                 temperature=0.0,
             )
-            translate = json.loads(response.choices[0].message.content)
-            if translate.get("final_translation") is not None:
-                entry.msgstr = translate.get("final_translation")
-                break
-            print("None occured, retry")
-        self.token_usage_prompt += response.usage.prompt_tokens
-        self.token_usage_generated += response.usage.completion_tokens
+            logger.info("Got response!")
+
+            self.token_usage_prompt += response.usage.prompt_tokens
+            self.token_usage_generated += response.usage.completion_tokens
+            try:
+                translate = json.loads(response.choices[0].message.content)
+                if translate.get("final_translation") is not None:
+                    entry.msgstr = translate.get("final_translation")
+                    logger.info("Entry translated!")
+                    return entry
+                else:
+                    logger.warning(f"Response None. \nInput: {text}, \nResponse: {response}")
+                
+            except:
+                logger.error(f"FAILED TO GET JSON. \nInput: {text} \nContent: {response}")
+
+            logger.warning(f"Retry.")
+        logger.error("Retry limit exceeded")
+        entry.msgstr = "ERROR"
         return entry
 
     async def translate_text(self, text: str):
@@ -111,11 +122,14 @@ class Translator:
                 response_format={"type": "json_object"},
                 temperature=0.0,
             )
+            logger.info("Entry translated!")
             translate = json.loads(response.choices[0].message.content)
             if translate.get("final_translation") is not None:
                 self.token_usage_prompt += response.usage.prompt_tokens
                 self.token_usage_generated += response.usage.completion_tokens
-                return translate.get("final_translation")
+                if not isinstance(translate.get("final_translation"), str):
+                    logger.warning("Response with translation was not str instance.")
+                return str(translate.get("final_translation"))
             print("None occured, retry")
 
     def estimate_usage(self, entry: polib.POFile):
