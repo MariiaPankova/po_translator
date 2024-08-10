@@ -51,6 +51,7 @@ class Translator:
         )
 
     async def translate(self, text: str) -> None | str:
+        print("got text ",text)
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -61,8 +62,10 @@ class Translator:
                 {"role": "user", "content": text},
             ],
             response_format={"type": "json_object"},
-            temperature=0.0,
+            temperature=0.4,
+            max_tokens=300
         )
+        print(text, "\n",response.choices[0].message.content, "\n$$$$$$$$$$$$$$$$$$$")
         self.n_api_requests += 1
         self.token_usage_prompt += response.usage.prompt_tokens
         self.token_usage_generated += response.usage.completion_tokens

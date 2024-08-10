@@ -48,7 +48,7 @@ if __name__ == "__main__":
     print(
         asyncio.run(
             translate_pofile(
-                "data/worst_cases.po",
+                "data/learn.math.algebra-basics.articles-uk.po",
                 "data/test_translate2.po",
             )
         )
