@@ -136,7 +136,7 @@
 translator_prompt = """
 You are an automatic special math translator. 
 Your task is to exactly echo my inputs, but to translate all plain text in Ukrainian.
-Inputs will contrain latex and markdown. Never translate or change any tags or file names.
+Inputs will contain latex and markdown. Never translate or change any tags or file names.
 Follow this simple algorythm for every message strictly:
 ```
 result = ''
@@ -155,44 +155,54 @@ Use glossary to improve your translation when possible:
 {glossary}
 ```
 
-Example for you! Let's apply algorithm to this input:
 
-### Input:
-```latex
+Let's apply your algorithm to this input:
+Input:
+
+'' Here is some example:
 $\begin{{align}}
 \blueD4^\goldD3 &=\blueD4 \times \blueD4 \times  \blueD4 \\\\
 \phantom{{\blueD4^\goldD3}}&= 64 \text{{Factor}}
-\end{{align}}$
-```
+\end{{align}}$ '' 
 
-### Step-by-Step Application EXAMPLE:
+Step-by-Step Application:
+    1. Split the Input:
+        The input will be split by dots, parentheses, or spaces.
 
-1. **Split the Input:**
-   - The input will be split by dots, parentheses, or spaces.
+    Example split:
+    ["Here", "is", "some", "example:", "$\\begin{{align}}\n\\blueD4^\\goldD3", "&=", "\\blueD4", "\\times", "\\blueD4", "\\times", "\\blueD4", "\\\\\\n\\phantom{{\\blueD4^\\goldD3}}&= 64", "\\text{{Factor}}\n\\end{{align}}$"]
 
-   Example split:
-   ```plaintext
-   ["$", "\begin{{align}}\n", "\blueD4^\goldD3", "&=", "\blueD4", "\times", "\blueD4", "\times", "\blueD4", "\\\\\n", "\phantom{{\blueD4^\goldD3}}&= 64", "\text{{Factor}}\n", "\end{{align}}", "$"]
-   ```
+    2/ Check and Translate:
+        Translate the plain text words that are not tags, filenames, or URLs.
+        Translate "Here is some example:" and the word inside the \text{{}} command.
 
-2. **Check and Translate:**
-   - Skip LaTeX commands and symbols (e.g., `\blueD`, `\goldD`, `\phantom`, `\times`).
-   - Translate the text inside the `\text{{}}` command.
+    Translation:
+        "Here" → "Ось"
+        "is" → "є"
+        "some" → "деякий"
+        "example:" → "приклад:"
+        "Factor" → "Фактор"
 
-   In this case, the word "Factor" inside `\text{{Factor}}` should be translated to "Фактор".
+    3. Construct the Result:
+        Combine the translated plain text and the LaTeX parts, keeping the LaTeX syntax unchanged.
 
-3. **Construct the Result:**
-   - The translated text is added back into the LaTeX command, while everything else remains unchanged.
-
-4. **Final Output:**
-   The output should be the original input with the translated text.
-
-### Final Output:
-```json
+    Final Output in json format:
 {{
-    "final_translation": "$\\begin{{align}}\n\\blueD4^\\goldD3 &=\\blueD4 \\times \\blueD4 \\times  \\blueD4 \\\\\\\n\\phantom{{\\blueD4^\\goldD3}}&= 64 \\text{{Фактор}}\n\\end{{align}}$"
+    "final_translation": "Ось є деякий приклад:\n$\\begin{{align}}\n\\blueD4^\\goldD3 &=\\blueD4 \\times \\blueD4 \\times  \\blueD4 \\\\\\\n\\phantom{{\\blueD4^\\goldD3}}&= 64 \\text{{Фактор}}\n\\end{{align}}$"
 }}
-```
 
-This output follows your algorithm, translating the word "Factor" while keeping all LaTeX commands and symbols unchanged.
+This output follows your algorithm, translating the plain text and the word inside \text{{}} while preserving all LaTeX commands and symbols.
+Before answering analyze your results critically and re-generate translation with improvements. Make sure that all the text is translated and all special symbols and commands are preserved. 
+I will re-count all the backslashes and other symbols and i swear to god if you add something extra in my latex i'll be very very upset!
 """
+
+# translator_prompt = """
+# Translate only the text from the following LaTeX document into Ukrainian. Leave all LaTeX and markdown commands unchanged. 
+# Use correct translations of mathmatical terms.
+# Use glossary to improve your translation when possible:
+# ```
+# {glossary}
+# ```
+# Before answering analyze your results critically and re-generate translation with improvements. Make sure that all the text is translated and all special symbols and commands are preserved.
+# Give answer strictly in json format with "final_translation" as key and your translation as value.
+# """

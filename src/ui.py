@@ -7,18 +7,17 @@ from read_pot import estimate_pofile, translate_pofile, translate_text_entry
 
 
 async def process_file(api_key: str, input_file: str):
-    environ["OPENAI_API_KEY"] = api_key
     output_path = path.join(
         path.split(input_file)[0], "UA_translated_" + path.split(input_file)[-1]
     )
-    tokens = await translate_pofile(input_file, output_path)
+    tokens = await translate_pofile(input_file, output_path, api_key)
     logger.info("File finished!")
     return output_path, tokens
 
 
 async def process_text(api_key: str, input_text: str):
     environ["OPENAI_API_KEY"] = api_key
-    translation, tokens = await translate_text_entry(input_text)
+    translation, tokens = await translate_text_entry(input_text, api_key)
     if translation is None:
         raise gr.Error("Error occured. Please retry.")
     return translation, tokens
@@ -39,7 +38,7 @@ with gr.Blocks() as demo:
         estimate_button = gr.Button(value="Estimate")
         estimated_tokens = gr.Text(label="Estimated read usage")
         estimate_button.click(
-            estimate_pofile, inputs=[input_file], outputs=[estimated_tokens]
+            estimate_pofile, inputs=[api_key, input_file], outputs=[estimated_tokens]
         )
 
     with gr.Tab(label="Translate text chunck"):

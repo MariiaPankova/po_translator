@@ -11,8 +11,9 @@ from typing_extensions import Self
 
 from prompt import translator_prompt
 
-load_dotenv()
-
+def get_client(openai_key: str):
+    client = AsyncOpenAI(api_key=openai_key)
+    return client
 
 class Translator:
     token_usage_prompt: int
@@ -21,16 +22,18 @@ class Translator:
 
     def __init__(
         self,
+        client: AsyncOpenAI,
         model: str = "gpt-4o-mini",
         prompt: str = translator_prompt,
         spreadsheet_path: str = "https://docs.google.com/spreadsheets/d/1Uu2dv8W4mKegu_EswaXOhtIkOURv5Ixn/export?gid=827914249&format=csv",
     ):
-        self.client = AsyncOpenAI()
+        
         self.model = model
         self.prompt = prompt
         self.glossary = self._set_glossary(spreadsheet_path)
         self.max_retry = 3
         self.lock = asyncio.Lock()
+        self.client = client
 
     def _set_glossary(self, glossary_path: str):
         glossary = (
@@ -44,6 +47,7 @@ class Translator:
         self.token_usage_prompt = 0
         self.token_usage_generated = 0
         self.n_api_requests = 0
+        return self
 
     def __exit__(self, *args):
         logger.info(
@@ -62,7 +66,7 @@ class Translator:
                 {"role": "user", "content": text},
             ],
             response_format={"type": "json_object"},
-            temperature=0.4,
+            temperature=0.0,
             max_tokens=300
         )
         print(text, "\n",response.choices[0].message.content, "\n$$$$$$$$$$$$$$$$$$$")
@@ -120,4 +124,4 @@ class Translator:
         return num_tokens
 
 
-translator = Translator()
+
