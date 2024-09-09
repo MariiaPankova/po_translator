@@ -51,7 +51,9 @@ class Translator:
 
     def __exit__(self, *args):
         logger.info(
-            f"Requests made: {self.n_api_requests}, Tokens read: {self.token_usage_prompt}, Tokens generated: {self.token_usage_generated}"
+            f"Requests made: {self.n_api_requests}, \
+            Tokens read: {self.token_usage_prompt}, \
+            Tokens generated: {self.token_usage_generated}"
         )
 
     async def translate(self, text: str) -> None | str:
@@ -65,8 +67,7 @@ class Translator:
                 },
                 {"role": "user", "content": text},
             ],
-            response_format={"type": "json_object"},
-            temperature=0.0,
+            temperature=0.3,
             max_tokens=300
         )
         print(text, "\n",response.choices[0].message.content, "\n$$$$$$$$$$$$$$$$$$$")
@@ -74,17 +75,9 @@ class Translator:
         self.token_usage_prompt += response.usage.prompt_tokens
         self.token_usage_generated += response.usage.completion_tokens
         try:
-            translate = json.loads(response.choices[0].message.content)
-            if translate.get("final_translation") is not None:
-                result = translate.get("final_translation")
-                logger.info("Entry translated!")
-                return result
-            else:
-                logger.warning(
-                    f"Response None. \nInput: {text}, \nResponse: {response}"
-                )
+            return response.choices[0].message.content
         except:
-            logger.error(f"FAILED TO GET JSON. \nInput: {text} \nContent: {response}")
+            logger.error(f"FAILED TO GET RESPONSE. \nInput: {text} \nContent: {response}")
         return None
 
     async def translate_entry(self, entry: polib.POFile):

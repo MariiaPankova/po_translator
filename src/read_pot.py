@@ -36,7 +36,7 @@ async def translate_pofile(filepath: str, output_path: str, api_key: str) -> int
     }
 
 
-async def estimate_pofile(filepath: str):
+async def estimate_pofile(filepath: str, api_key: str):
     source_pofile = polib.pofile(filepath)
     token_estimate = 0
     for entry in source_pofile:
@@ -49,9 +49,9 @@ if __name__ == "__main__":
     print(
         asyncio.run(
             translate_pofile(
-                "/home/mariia/Projects/po_translator/data/learn.math.1-ano.exercises-uk.po",
+                "/Users/mariiapankova/Documents/projects/po_translator/data/learn.math.calculus-home.articles-uk.po",
                 "data/test_translate2.po",
-                api_key="sk-..."
+                api_key="sk..."
             )
         )
     )

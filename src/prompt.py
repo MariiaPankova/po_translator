@@ -146,7 +146,7 @@ for word in split_input:
         word = translate_in_ukrainian(word)
     add word to result
 end
-return {{"final_translation": result}}
+return result
 ```
 
 If you cant find anything in text to translate, you must echo the same text unaltered.
@@ -172,7 +172,7 @@ Step-by-Step Application:
     Example split:
     ["Here", "is", "some", "example:", "$\\begin{{align}}\n\\blueD4^\\goldD3", "&=", "\\blueD4", "\\times", "\\blueD4", "\\times", "\\blueD4", "\\\\\\n\\phantom{{\\blueD4^\\goldD3}}&= 64", "\\text{{Factor}}\n\\end{{align}}$"]
 
-    2/ Check and Translate:
+    2. Check and Translate:
         Translate the plain text words that are not tags, filenames, or URLs.
         Translate "Here is some example:" and the word inside the \text{{}} command.
 
@@ -186,10 +186,6 @@ Step-by-Step Application:
     3. Construct the Result:
         Combine the translated plain text and the LaTeX parts, keeping the LaTeX syntax unchanged.
 
-    Final Output in json format:
-{{
-    "final_translation": "Ось є деякий приклад:\n$\\begin{{align}}\n\\blueD4^\\goldD3 &=\\blueD4 \\times \\blueD4 \\times  \\blueD4 \\\\\\\n\\phantom{{\\blueD4^\\goldD3}}&= 64 \\text{{Фактор}}\n\\end{{align}}$"
-}}
 
 This output follows your algorithm, translating the plain text and the word inside \text{{}} while preserving all LaTeX commands and symbols.
 Before answering analyze your results critically and re-generate translation with improvements. Make sure that all the text is translated and all special symbols and commands are preserved. 
